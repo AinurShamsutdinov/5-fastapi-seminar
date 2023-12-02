@@ -15,31 +15,44 @@ tasks = list()
 
 
 class Task(BaseModel):
-    id: str
+    id: str = None
     title: str = None
     description: str = None
-    status: bool = None
+    status: str = None
 
 
 @app.get('/tasks')
 async def read_root():
     logger.info('GET request.')
-    return JSONResponse(tasks)
+    return tasks
 
 
-@app.post('/task/')
+@app.post('/tasks')
 async def create_item(task: Task):
     logger.info('POST request.')
+    task_id = len(tasks)
+    task.id = task_id
+    tasks.append(task)
     return task
 
 
-@app.put('/task/{task_id}')
-async def update_item(task_id: int, task: Task):
-    logger.info(f'Put request with item ID = {task_id}.')
-    return {'item_id': task_id, 'item': task}
+@app.put('/tasks/{task_id}')
+async def update_item(task_id: int, task_update: Task):
+    logger.info(f'Put task with item ID = {task_id}.')
+    for task in tasks:
+        if task.id == task_id:
+            task.title = task_update.title
+            task.description = task_update.description
+            task.status = task_update.status
+            return task
+    return list()
 
 
-@app.delete('/task/{task_id}')
+@app.delete('/tasks/{task_id}')
 async def delete_item(task_id: int):
-    logger.info(f'DELETE request with item ID = {task_id}.')
-    return {'item_id': task_id}
+    logger.info(f'DELETE task with ID = {task_id}.')
+    if len(tasks) > 0:
+        tasks.pop(task_id)
+        return {'task_id': task_id}
+    message = f'does not exist task with ID = {task_id}'
+    return JSONResponse(content=message, status_code=404)
