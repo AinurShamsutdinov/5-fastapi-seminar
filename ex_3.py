@@ -1,9 +1,12 @@
 import logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
+templates = Jinja2Templates(directory='./templates')
 
 
 users: list = list()
@@ -43,3 +46,24 @@ async def update_user(us_up: User):
             return user
     message = f'User with ID = {us_up.id}, does not exist'
     return JSONResponse(content=message, status_code=404)
+
+
+# 5th exercise
+@app.delete('/user/{email}')
+async def delete_user(email: str):
+    for user in users:
+        if user.email == email:
+            users.remove(user)
+            message = f'User with Email = {email} deleted'
+            return JSONResponse(content=message, status_code=200)
+    message = f'User with Email = {email}, does not exist'
+    return JSONResponse(content=message, status_code=404)
+
+
+# 6th exercise
+@app.get('/users/', response_class=HTMLResponse)
+async def get_users(request: Request):
+    context = dict()
+    context['request'] = request
+    context['users'] = users
+    return templates.TemplateResponse('index.html', context)
