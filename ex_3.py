@@ -1,9 +1,10 @@
 import logging
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from typing import Annotated
 
 app = FastAPI()
 templates = Jinja2Templates(directory='./templates')
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class User(BaseModel):
-    id: int
+    id: str = None
     name: str = None
     email: str = None
     password: str = None
@@ -67,3 +68,14 @@ async def get_users(request: Request):
     context['request'] = request
     context['users'] = users
     return templates.TemplateResponse('index.html', context)
+
+
+@app.post('/usercreate/')
+async def create_user(user_id: Annotated[str, Form()],
+                      user_name: Annotated[str, Form()],
+                      user_email: Annotated[str, Form()],
+                      user_password: Annotated[str, Form()],
+                      request: Request):
+    users.append(User(id=user_id, name=user_name, email=user_email, password=user_password))
+    redirect_url = request.url_for('get_users')
+    return RedirectResponse(redirect_url, status_code=303)

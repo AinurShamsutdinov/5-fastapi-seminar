@@ -15,5 +15,17 @@
             </tr>
         {% endfor %}
     </table>
+
+    <form method="post" action="/usercreate/">
+        <label>User ID:</label>
+        <input type="text" name="user_id">
+        <label>Username:</label>
+        <input type="text" name="user_name">
+        <label>User Email:</label>
+        <input type="text" name="user_email">
+        <label>User password:</label>
+        <input type="password" name="user_password">
+        <input type="submit" value="Submit">
+    </form>
 </body>
 </html>
